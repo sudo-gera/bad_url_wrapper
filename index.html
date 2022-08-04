@@ -1,0 +1,79 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>url shorter</title>
+        <script>
+            function removeAllChildNodes(parent) {
+                while (parent.firstChild) {
+                    parent.removeChild(parent.firstChild);
+                }
+            }
+            function copyurl(){
+                try{
+                    let url=document.getElementById('created_link').innerText
+                    navigator.clipboard.writeText(url);
+                }catch(e){
+                    console.log(e);
+                }
+            }
+            function goturl(){
+                try{
+                    let url=document.getElementById('url').value;
+                    url=btoa(url);
+                    let curl=document.location.href;
+                    curl+='?$';
+                    curl+=url;
+                    let r=document.getElementById('result');
+                    removeAllChildNodes(r);
+                    let a=document.createElement('a');
+                    a.href=curl;
+                    a.id="created_link"
+                    a.innerText=curl;
+                    r.appendChild(a);
+                    document.getElementById('copybutton').style.display="block";
+                    document.getElementById('copytext').style.display="block";
+                }catch(e){
+                    console.log(e);
+                }
+            }
+            let curl=document.location.href;
+            if (curl.includes('?$')){
+                curl=curl.split('?$')[1];
+                curl=atob(curl);
+                // console.log(curl);
+                document.location.href=curl;
+            }
+        </script>
+        <style>
+            .centered{
+                text-align: center;
+                display: block;
+                margin-left: auto;
+                margin-right: auto
+            }
+            #copybutton{
+                display: none;
+            }
+            #copytext{
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 class="centered">Online bad URL wrapper</h1>
+        <h3 class="centered">Some URL shortener doesn't accept your URL?</h3>
+        <h3 class="centered">you can wrap it here!</h3>
+        <form onsubmit="goturl();return false;">
+            <input class="centered" placeholder="URL to wrap" id="url"/>
+            <input class="centered" type="submit" value="wrap!"/>
+        </form>
+        <div class="centered" id="result">
+
+        </div>
+        <form onsubmit="copyurl();return false;">
+            <input id="copybutton" class="centered" type="submit" value="copy url"/>
+        </form>
+        <h3 class="centered" id="copytext">now you can go back to URL shortener and use this url!</h3>
+    </body>
+</html>
