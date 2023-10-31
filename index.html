@@ -4,6 +4,30 @@
         <meta charset="utf-8">
         <title>url shorter</title>
         <script>
+            function stringToHex(str) {
+                let hex = '';
+                for (let i = 0; i < str.length; i++) {
+                    const charCode = str.charCodeAt(i);
+                    const hexValue = charCode.toString(16);
+                    hex += hexValue.padStart(2, '0');
+                }
+                return hex;
+            };
+            const hexToString = (hex) => {
+                let str = '';
+                for (let i = 0; i < hex.length; i += 2) {
+                    const hexValue = hex.substr(i, 2);
+                    const decimalValue = parseInt(hexValue, 16);
+                    str += String.fromCharCode(decimalValue);
+                }
+                return str;
+            };
+            function utf8_encode(str) {
+                return stringToHex(window.btoa(unescape(encodeURIComponent(str))));
+            }
+            function utf8_decode(str) {
+                return decodeURIComponent(escape(window.atob(hexToString(str))));
+            }
             function removeAllChildNodes(parent) {
                 while (parent.firstChild) {
                     parent.removeChild(parent.firstChild);
@@ -20,27 +44,43 @@
             function goturl(){
                 try{
                     let url=document.getElementById('url').value;
-                    url=btoa(url);
-                    let curl=document.location.href;
-                    curl+='?$';
-                    curl+=url;
-                    let r=document.getElementById('result');
-                    removeAllChildNodes(r);
-                    let a=document.createElement('a');
-                    a.href=curl;
-                    a.id="created_link"
-                    a.innerText=curl;
-                    r.appendChild(a);
-                    document.getElementById('copybutton').style.display="block";
-                    document.getElementById('copytext').style.display="block";
+                    if (url != ''){
+                        if (!url.startsWith('http://') && !url.startsWith('https://')){
+                            url = 'http://' + url;
+                        }
+                        try{
+                            url_object = new URL(url);
+                        }catch(exc){
+                            alert('INVALID URL');
+                            return;
+                        }
+                        url=utf8_encode(url);
+                        let curl=document.location.href;
+                        curl+='?url=';
+                        curl+=url;
+                        let r=document.getElementById('result');
+                        removeAllChildNodes(r);
+                        let a=document.createElement('a');
+                        a.href=curl;
+                        a.id="created_link"
+                        a.innerText=curl;
+                        r.appendChild(a);
+                        document.getElementById('copybutton').style.display="block";
+                        document.getElementById('copytext').style.display="block";
+                    }else{
+                        let r=document.getElementById('result');
+                        removeAllChildNodes(r);
+                        document.getElementById('copybutton').style.display="none";
+                        document.getElementById('copytext').style.display="none";
+                    }
                 }catch(e){
                     console.log(e);
                 }
             }
             let curl=document.location.href;
-            if (curl.includes('?$')){
-                curl=curl.split('?$')[1];
-                curl=atob(curl);
+            if (curl.includes('?url=')){
+                curl=curl.split('?url=')[1];
+                curl=utf8_decode(curl);
                 // console.log(curl);
                 document.location.href=curl;
             }
@@ -61,9 +101,8 @@
         </style>
     </head>
     <body>
-        <h1 class="centered">Online bad URL wrapper</h1>
-        <h3 class="centered">Some URL shortener doesn't accept your URL?</h3>
-        <h3 class="centered">you can wrap it here!</h3>
+        <h1 class="centered">Online wrapper for bad URL</h1>
+        <h3 class="centered">If you cannot submit bad URL somewhere, wrap it here!</h3>
         <form onsubmit="goturl();return false;">
             <input class="centered" placeholder="URL to wrap" id="url"/>
             <input class="centered" type="submit" value="wrap!"/>
@@ -74,6 +113,6 @@
         <form onsubmit="copyurl();return false;">
             <input id="copybutton" class="centered" type="submit" value="copy url"/>
         </form>
-        <h3 class="centered" id="copytext">now you can go back to URL shortener and use this url!</h3>
+        <h3 class="centered" id="copytext">now you can go back and use this url!</h3>
     </body>
 </html>
